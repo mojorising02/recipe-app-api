@@ -57,7 +57,7 @@ class PrivateTagsAPITest(TestCase):
             'other@xyz.com',
             'otherpass'
         )
-        Tag.objects.create(user=user2, name='Fruity')
+        user2_tag = Tag.objects.create(user=user2, name='Fruity')
         tag = Tag.objects.create(user=self.user, name='Comfort Food')
 
         res = self.client.get(TAGS_URL)
@@ -66,3 +66,8 @@ class PrivateTagsAPITest(TestCase):
         self.assertEqual(res.data[0]['name'], tag.name)
 
         # should we test something simliar for user2?
+        self.client.force_authenticate(user2)
+        res = self.client.get(TAGS_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data[0]['name'], user2_tag.name)
